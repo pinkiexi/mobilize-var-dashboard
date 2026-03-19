@@ -1,4 +1,4 @@
-# Risk Dashboard — VaR · ICAAP · Stress Tests
+# Risk Dashboard - VaR · ICAAP · Stress Tests
 
 Dashboard interactif de gestion des risques financiers.
 
