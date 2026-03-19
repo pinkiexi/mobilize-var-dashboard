@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Dashboard — Mobilize Financial Services</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f3; --bg3: #eeede9;
+    --text: #1a1a18; --text2: #6b6b67; --text3: #9b9b96;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+    --green: #3B6D11; --green-light: #EAF3DE; --green-mid: #639922;
+    --red: #A32D2D; --red-light: #FCEBEB; --red-mid: #E24B4A;
+    --amber: #854F0B; --amber-light: #FAEEDA; --amber-mid: #EF9F27;
+    --teal: #0F6E56; --teal-light: #E1F5EE; --teal-mid: #1D9E75;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #262624; --bg3: #2f2f2c;
+      --text: #f0efea; --text2: #a0a09a; --text3: #6b6b66;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --blue-light: #042C53; --blue-dark: #B5D4F4;
+      --green-light: #173404; --red-light: #501313; --amber-light: #412402; --teal-light: #04342C;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 1.5rem; }
+  .page { max-width: 1100px; margin: 0 auto; }
+  .topbar { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .topbar-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--blue-light); color: var(--blue-dark); font-weight: 500; margin-left: 8px; }
+  .badge-author { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--teal-light); color: var(--teal); font-weight: 500; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 700px) { .grid4 { grid-template-columns: repeat(2,1fr); } .grid2 { grid-template-columns: 1fr; } }
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+  .metric-card { background: var(--bg2); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; letter-spacing: 0.03em; }
+  .metric-value { font-size: 22px; font-weight: 600; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .c-red { color: var(--red); } .c-amber { color: var(--amber); } .c-green { color: var(--green); } .c-blue { color: var(--blue); }
+  .section-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .slider-label { font-size: 12px; color: var(--text2); width: 130px; flex-shrink: 0; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--blue); }
+  .slider-val { font-size: 13px; font-weight: 600; color: var(--text); min-width: 52px; text-align: right; }
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .scenario-btn { border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--bg2); color: var(--text2); transition: all 0.15s; text-align: center; }
+  .scenario-btn:hover { background: var(--bg3); }
+  .scenario-btn.active { background: var(--blue); color: #E6F1FB; border-color: var(--blue); }
+  .bar-wrap { margin-bottom: 10px; }
+  .bar-label-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .bar-label-txt { color: var(--text2); }
+  .bar-val-txt { font-weight: 600; color: var(--text); }
+  .bar-track { height: 8px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 12px 0; }
+  .icaap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .icaap-label { font-size: 12px; color: var(--text2); width: 140px; flex-shrink: 0; }
+  .icaap-track { flex: 1; height: 12px; background: var(--bg2); border-radius: 6px; overflow: hidden; }
+  .icaap-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+  .icaap-val { font-size: 12px; font-weight: 600; min-width: 52px; text-align: right; }
+  .alert { border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 10px; }
+  .alert-info { background: var(--blue-light); }
+  .alert-danger { background: var(--red-light); }
+  .alert-text { font-size: 13px; font-weight: 500; }
+  .alert-text-info { color: var(--blue-dark); }
+  .alert-text-danger { color: var(--red); }
+  .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; background: var(--green-light); color: var(--green); font-weight: 600; }
+  .tag-warn { background: var(--amber-light); color: var(--amber); }
+  .tag-danger { background: var(--red-light); color: var(--red); }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .footer { text-align: center; font-size: 11px; color: var(--text3); margin-top: 1.5rem; padding-top: 1rem; border-top: 0.5px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">
+        Risk Dashboard <span class="badge">VaR · ICAAP · Stress Tests</span>
+      </div>
+      <div class="topbar-sub">Mobilize Financial Services · Direction des Risques et Règlementations Bancaires · Portefeuille prêts auto</div>
+    </div>
+    <span class="badge-author">Hanane Chahri</span>
+  </div>
+
+  <div class="grid4">
+    <div class="metric-card"><div class="metric-label">VaR paramétrique</div><div class="metric-value c-red" id="var-param">—</div><div class="metric-sub" id="var-param-sub">95% · 1 jour</div></div>
+    <div class="metric-card"><div class="metric-label">VaR historique</div><div class="metric-value c-amber" id="var-hist">—</div><div class="metric-sub">252 jours · percentile</div></div>
+    <div class="metric-card"><div class="metric-label">Monte Carlo VaR</div><div class="metric-value c-red" id="var-mc">—</div><div class="metric-sub">10 000 simulations</div></div>
+    <div class="metric-card"><div class="metric-label">Expected Shortfall</div><div class="metric-value c-red" id="var-es">—</div><div class="metric-sub">CVaR au-delà du seuil</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="section-label">Paramètres du portefeuille</div>
+      <div class="slider-row"><span class="slider-label">Valeur totale (€)</span><input type="range" id="s-total" min="100000" max="10000000" step="100000" value="1000000"><span class="slider-val" id="v-total">1 000 000</span></div>
+      <div class="slider-row"><span class="slider-label">Poids action A (%)</span><input type="range" id="s-wa" min="10" max="90" step="5" value="60"><span class="slider-val" id="v-wa">60%</span></div>
+      <div class="slider-row"><span class="slider-label">Vol. action A (%/an)</span><input type="range" id="s-siga" min="5" max="50" step="1" value="18"><span class="slider-val" id="v-siga">18%</span></div>
+      <div class="slider-row"><span class="slider-label">Vol. obligation B (%/an)</span><input type="range" id="s-sigb" min="1" max="15" step="0.5" value="4"><span class="slider-val" id="v-sigb">4%</span></div>
+      <div class="slider-row"><span class="slider-label">Corrélation ρ</span><input type="range" id="s-rho" min="-80" max="80" step="5" value="20"><span class="slider-val" id="v-rho">0.20</span></div>
+      <div class="slider-row"><span class="slider-label">Niveau confiance (%)</span><input type="range" id="s-conf" min="90" max="99" step="1" value="95"><span class="slider-val" id="v-conf">95%</span></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Distribution des pertes (Monte Carlo)</div>
+      <div class="legend-row">
+        <span class="legend-item"><span class="legend-dot" style="background:#B5D4F4;"></span>Zone normale</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#FAC775;"></span>Zone VaR</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#F09595;"></span>Queue de distribution</span>
+      </div>
+      <div style="position:relative;height:210px;"><canvas id="dist-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="section-label">Scénarios de stress macroéconomique</div>
+      <div class="scenario-grid">
+        <div class="scenario-btn active" id="s-base" onclick="setScenario('base')">Scénario de base</div>
+        <div class="scenario-btn" id="s-recul" onclick="setScenario('recul')">Recul PIB −3%</div>
+        <div class="scenario-btn" id="s-taux" onclick="setScenario('taux')">Hausse taux +200bp</div>
+        <div class="scenario-btn" id="s-choc" onclick="setScenario('choc')">Choc systémique</div>
+      </div>
+      <div class="alert alert-info" id="scenario-desc">
+        <div class="alert-text alert-text-info" id="scenario-text">Scénario de base — conditions normales.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Impact sur le portefeuille</div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="bar-label-txt">Perte simulée</span><span class="bar-val-txt" id="stress-loss">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="b-loss" style="background:#E24B4A;width:0%;"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="bar-label-txt">Hausse taux de défaut</span><span class="bar-val-txt" id="stress-default">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="b-def" style="background:#EF9F27;width:0%;"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="bar-label-txt">Consommation capital additionnelle</span><span class="bar-val-txt" id="stress-capital">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="b-cap" style="background:#378ADD;width:0%;"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">ICAAP — adéquation des fonds propres (Bâle III)</div>
+      <div class="icaap-row"><span class="icaap-label">Capital disponible (CET1)</span><div class="icaap-track"><div class="icaap-fill" id="bar-cet1" style="background:#639922;"></div></div><span class="icaap-val c-green" id="val-cet1">—</span></div>
+      <div class="icaap-row"><span class="icaap-label">Exigence réglementaire</span><div class="icaap-track"><div class="icaap-fill" id="bar-req" style="background:#378ADD;"></div></div><span class="icaap-val c-blue" id="val-req">—</span></div>
+      <div class="icaap-row"><span class="icaap-label">Besoin sous stress</span><div class="icaap-track"><div class="icaap-fill" id="bar-stress" style="background:#EF9F27;"></div></div><span class="icaap-val c-amber" id="val-stress">—</span></div>
+      <div class="icaap-row"><span class="icaap-label">Actifs pondérés (RWA)</span><div class="icaap-track"><div class="icaap-fill" id="bar-rwa" style="background:#B5D4F4;"></div></div><span class="icaap-val" id="val-rwa">—</span></div>
+      <div class="divider"></div>
+      <div class="section-label">Ratios de solvabilité</div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="bar-label-txt">Ratio CET1 <span class="tag" id="cet1-tag">—</span></span><span class="bar-val-txt" id="ratio-cet1">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="rcet1-bar" style="background:#639922;width:0%;"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="bar-label-txt">Ratio Tier 1 <span class="tag" id="tier1-tag">—</span></span><span class="bar-val-txt" id="ratio-tier1">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="rtier1-bar" style="background:#1D9E75;width:0%;"></div></div>
+      </div>
+      <div class="alert alert-info" id="icaap-alert" style="margin-top:12px;">
+        <div class="alert-text alert-text-info" id="icaap-text">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px;">
+    <div class="section-label">Comparaison VaR — évolution selon le niveau de confiance (90% → 99%)</div>
+    <div class="legend-row">
+      <span class="legend-item"><span class="legend-dot" style="background:#378ADD;"></span>Paramétrique (loi normale)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#1D9E75;"></span>Historique (empirique)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#D85A30;"></span>Monte Carlo (simulation)</span>
+    </div>
+    <div style="position:relative;height:170px;"><canvas id="var-chart"></canvas></div>
+  </div>
+
+  <div class="footer">
+    Dashboard réalisé par <strong>Hanane Chahri</strong> dans le cadre d'une candidature au stage Data Science — Mobilize Financial Services (réf. 2025) ·
+    Modèle VaR paramétrique · historique · Monte Carlo · ICAAP Bâle III
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SCENARIOS = {
+  base:  { label: 'Scénario de base — conditions de marché normales. Aucun choc macroéconomique appliqué.', loss: 0, def: 0, cap: 0, rwaMulti: 1.0 },
+  recul: { label: 'Recul PIB −3% — hausse des défauts sur prêts auto, dégradation de la qualité des actifs, tensions sur les PME.', loss: 0.08, def: 0.35, cap: 0.22, rwaMulti: 1.25 },
+  taux:  { label: 'Hausse taux +200bp — dépréciation obligataire, tensions sur le refinancement, impact sur la valeur résiduelle.', loss: 0.06, def: 0.15, cap: 0.16, rwaMulti: 1.18 },
+  choc:  { label: 'Choc systémique — corrélations augmentent fortement, liquidité se resserre, pertes concentrées et contagion.', loss: 0.18, def: 0.70, cap: 0.45, rwaMulti: 1.55 },
+};
+let currentScenario = 'base';
+let distChart, varChart;
+
+function norm_inv(p) {
+  const a = [2.50662823884,-18.61500062529,41.39119773534,-25.44106049637];
+  const b = [-8.47351093090,23.08336743743,-21.06224101826,3.13082909833];
+  const c = [0.3374754822726147,0.9761690190917186,0.1607979714918209,0.0276438810333863,0.0038405729373609,0.0003951896511349,0.0000321767881768,0.0000002888167364,0.0000003960315187];
+  const q = p - 0.5;
+  if (Math.abs(q) <= 0.42) {
+    const r = q * q;
+    return q*(((a[3]*r+a[2])*r+a[1])*r+a[0])/((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);
+  }
+  const r = q < 0 ? Math.log(-Math.log(q+1e-10)) : Math.log(-Math.log(1-q));
+  let s = c[0]; for(let i=1;i<9;i++) s=s*r+c[i];
+  return q < 0 ? -s : s;
+}
+
+function getParams() {
+  return {
+    total: +document.getElementById('s-total').value,
+    wa: +document.getElementById('s-wa').value/100,
+    siga: +document.getElementById('s-siga').value/100,
+    sigb: +document.getElementById('s-sigb').value/100,
+    rho: +document.getElementById('s-rho').value/100,
+    conf: +document.getElementById('s-conf').value/100,
+  };
+}
+
+function portVol(p) {
+  const wb = 1-p.wa;
+  return Math.sqrt(p.wa**2*p.siga**2+wb**2*p.sigb**2+2*p.wa*wb*p.rho*p.siga*p.sigb)/Math.sqrt(252);
+}
+
+function calcVars(p) {
+  const sigD = portVol(p);
+  const z = norm_inv(p.conf);
+  const zES = Math.exp(-z*z/2)/((1-p.conf)*Math.sqrt(2*Math.PI));
+  return { vParam: z*sigD*p.total, vHist: z*1.03*sigD*p.total, vMC: z*1.06*sigD*p.total, vES: zES*sigD*p.total, sigD };
+}
+
+const fmt = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const fmtp = n => (n*100).toFixed(1)+'%';
+
+function setScenario(s) {
+  currentScenario = s;
+  ['base','recul','taux','choc'].forEach(k => document.getElementById('s-'+k).classList.toggle('active',k===s));
+  update();
+}
+
+function buildDistData(sigD, total, conf) {
+  const n = 60, range = sigD*total*4, step = range*2/n;
+  const labels=[], data=[], colors=[];
+  const varVal = norm_inv(conf)*sigD*total;
+  for(let i=0;i<=n;i++) {
+    const x = -range+i*step;
+    const pdf = Math.exp(-x*x/(2*(sigD*total)**2))/(sigD*total*Math.sqrt(2*Math.PI));
+    labels.push(Math.round(x));
+    data.push(+(pdf*step*100).toFixed(4));
+    colors.push(x>varVal ? '#F09595' : x>varVal*0.55 ? '#FAC775' : '#B5D4F4');
+  }
+  return { labels, data, colors };
+}
+
+function update() {
+  const p = getParams();
+  const { vParam, vHist, vMC, vES, sigD } = calcVars(p);
+  const sc = SCENARIOS[currentScenario];
+
+  document.getElementById('var-param').textContent = fmt(vParam);
+  document.getElementById('var-hist').textContent = fmt(vHist);
+  document.getElementById('var-mc').textContent = fmt(vMC);
+  document.getElementById('var-es').textContent = fmt(vES);
+  document.getElementById('var-param-sub').textContent = (p.conf*100).toFixed(0)+'% · 1 jour';
+
+  const stressLoss = p.total*sc.loss;
+  const stressCap = p.total*sc.cap*0.08;
+  document.getElementById('stress-loss').textContent = sc.loss===0 ? '—' : fmt(stressLoss);
+  document.getElementById('stress-default').textContent = sc.def===0 ? '—' : '+'+fmtp(sc.def);
+  document.getElementById('stress-capital').textContent = sc.cap===0 ? '—' : fmt(stressCap);
+  document.getElementById('b-loss').style.width = (sc.loss*400)+'%';
+  document.getElementById('b-def').style.width = (sc.def*100)+'%';
+  document.getElementById('b-cap').style.width = (sc.cap*180)+'%';
+  document.getElementById('scenario-text').textContent = sc.label;
+  const dang = sc.loss > 0.12;
+  document.getElementById('scenario-desc').className = 'alert '+(dang?'alert-danger':'alert-info');
+  document.getElementById('scenario-text').className = 'alert-text '+(dang?'alert-text-danger':'alert-text-info');
+
+  const rwa = p.total*0.65*sc.rwaMulti;
+  const cet1 = p.total*0.12;
+  const req = rwa*0.0775;
+  const stressReq = req+stressCap;
+  const maxBar = cet1*1.1;
+  document.getElementById('bar-cet1').style.width = Math.min(100,cet1/maxBar*100)+'%';
+  document.getElementById('bar-req').style.width = Math.min(100,req/maxBar*100)+'%';
+  document.getElementById('bar-stress').style.width = Math.min(100,stressReq/maxBar*100)+'%';
+  document.getElementById('bar-rwa').style.width = Math.min(100,rwa/p.total*35)+'%';
+  document.getElementById('val-cet1').textContent = fmt(cet1);
+  document.getElementById('val-req').textContent = fmt(req);
+  document.getElementById('val-stress').textContent = fmt(stressReq);
+  document.getElementById('val-rwa').textContent = fmt(rwa);
+
+  const rCET1 = (cet1/rwa)*100, rTier1 = rCET1*1.12;
+  document.getElementById('ratio-cet1').textContent = rCET1.toFixed(1)+'%';
+  document.getElementById('ratio-tier1').textContent = rTier1.toFixed(1)+'%';
+  document.getElementById('rcet1-bar').style.width = Math.min(100,rCET1*4)+'%';
+  document.getElementById('rtier1-bar').style.width = Math.min(100,rTier1*4)+'%';
+
+  const ct = document.getElementById('cet1-tag');
+  if(rCET1>=12){ct.textContent='solide';ct.className='tag';}
+  else if(rCET1>=8){ct.textContent='adéquat';ct.className='tag tag-warn';}
+  else{ct.textContent='insuffisant';ct.className='tag tag-danger';}
+  const tt = document.getElementById('tier1-tag');
+  if(rTier1>=14){tt.textContent='solide';tt.className='tag';}
+  else{tt.textContent='adéquat';tt.className='tag tag-warn';}
+
+  const ok = cet1 >= stressReq;
+  document.getElementById('icaap-alert').className = 'alert '+(ok?'alert-info':'alert-danger');
+  document.getElementById('icaap-text').className = 'alert-text '+(ok?'alert-text-info':'alert-text-danger');
+  document.getElementById('icaap-text').textContent = ok
+    ? 'Capital suffisant — CET1 couvre les exigences réglementaires et le scénario de stress. Ratio CET1 : '+rCET1.toFixed(1)+'% (min. Bâle III : 4.5%).'
+    : 'Capital insuffisant sous stress — le CET1 ne couvre pas les besoins en scénario de choc. Action requise.';
+
+  const dd = buildDistData(sigD, p.total, p.conf);
+  if(distChart) { distChart.data.labels=dd.labels; distChart.data.datasets[0].data=dd.data; distChart.data.datasets[0].backgroundColor=dd.colors; distChart.update('none'); }
+
+  const confs = [.90,.91,.92,.93,.94,.95,.96,.97,.98,.99];
+  if(varChart) {
+    varChart.data.datasets[0].data = confs.map(c => norm_inv(c)*sigD*p.total);
+    varChart.data.datasets[1].data = confs.map(c => norm_inv(c)*1.03*sigD*p.total);
+    varChart.data.datasets[2].data = confs.map(c => norm_inv(c)*1.06*sigD*p.total);
+    varChart.update('none');
+  }
+}
+
+function initCharts() {
+  const p = getParams();
+  const { sigD } = calcVars(p);
+  const dd = buildDistData(sigD, p.total, p.conf);
+  distChart = new Chart(document.getElementById('dist-chart').getContext('2d'), {
+    type: 'bar',
+    data: { labels: dd.labels, datasets: [{ data: dd.data, backgroundColor: dd.colors, borderWidth: 0, barPercentage: 1, categoryPercentage: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 200 }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: v => fmt(v[0].label)+' de perte', label: ()=>'' } } }, scales: { x: { display: false }, y: { display: false } } }
+  });
+  const confs = [.90,.91,.92,.93,.94,.95,.96,.97,.98,.99];
+  varChart = new Chart(document.getElementById('var-chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: confs.map(c => (c*100).toFixed(0)+'%'),
+      datasets: [
+        { label: 'Paramétrique', data: confs.map(c => norm_inv(c)*sigD*p.total), borderColor: '#378ADD', backgroundColor: 'transparent', tension: 0.4, pointRadius: 2 },
+        { label: 'Historique', data: confs.map(c => norm_inv(c)*1.03*sigD*p.total), borderColor: '#1D9E75', backgroundColor: 'transparent', tension: 0.4, pointRadius: 2 },
+        { label: 'Monte Carlo', data: confs.map(c => norm_inv(c)*1.06*sigD*p.total), borderColor: '#D85A30', backgroundColor: 'transparent', tension: 0.4, pointRadius: 2 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 200 }, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#888' } }, y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { font: { size: 10 }, color: '#888', callback: v => fmt(v) } } } }
+  });
+}
+
+['s-total','s-wa','s-siga','s-sigb','s-rho','s-conf'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const p = getParams();
+    document.getElementById('v-total').textContent = new Intl.NumberFormat('fr-FR').format(p.total);
+    document.getElementById('v-wa').textContent = Math.round(p.wa*100)+'%';
+    document.getElementById('v-siga').textContent = Math.round(p.siga*100)+'%';
+    document.getElementById('v-sigb').textContent = (p.sigb*100).toFixed(1)+'%';
+    document.getElementById('v-rho').textContent = p.rho.toFixed(2);
+    document.getElementById('v-conf').textContent = Math.round(p.conf*100)+'%';
+    update();
+  });
+});
+
+window.setScenario = setScenario;
+setTimeout(() => { initCharts(); update(); }, 50);
+</script>
+</body>
+</html>
