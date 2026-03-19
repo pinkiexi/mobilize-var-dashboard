@@ -5,10 +5,10 @@ Dashboard interactif de gestion des risques financiers.
 
 ## Fonctionnalités
 
-- **VaR** — 3 méthodes : paramétrique (loi normale), historique, Monte Carlo
-- **Expected Shortfall** — CVaR au-delà du seuil de confiance
-- **Stress tests macroéconomiques** — recul PIB, hausse taux, choc systémique
-- **ICAAP / Bâle III** — adéquation des fonds propres, ratios CET1 et Tier 1
+- **VaR** : 3 méthodes : paramétrique (loi normale), historique, Monte Carlo
+- **Expected Shortfall** : CVaR au-delà du seuil de confiance
+- **Stress tests macroéconomiques** : recul PIB, hausse taux, choc systémique
+- **ICAAP / Bâle III** : adéquation des fonds propres, ratios CET1 et Tier 1
 
 ## Stack
 
