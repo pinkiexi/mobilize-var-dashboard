@@ -15,27 +15,28 @@ Dashboard interactif de gestion des risques financiers.
 HTML · CSS · JavaScript · Chart.js
 
 
-## Interprétation des résultats
+## Interprétation
 
-**VaR paramétrique** : suppose une distribution normale des rendements. 
-Rapide à calculer mais sous-estime le risque en présence de queues épaisses.
+Ce dashboard m'a permis de mieux comprendre les concepts abordés lors de 
+l'entretien. Voici ce que j'en ai retenu :
 
-**VaR historique** : basée sur les 252 derniers jours ouvrés. 
-Plus réaliste car elle reflète les vrais mouvements de marché, sans hypothèse distributionnelle.
+**VaR** — il existe plusieurs façons de la calculer (paramétrique, historique, 
+Monte Carlo), chacune avec ses hypothèses et ses limites. La méthode 
+paramétrique suppose une distribution normale, ce qui peut sous-estimer 
+les pertes extrêmes.
 
-**Monte Carlo** : 10 000 simulations de scénarios. 
-La plus robuste, capte les non-linéarités et les cas extrêmes.
+**Expected Shortfall** — va plus loin que la VaR en mesurant ce qui se passe 
+au-delà du seuil, ce qui la rend plus pertinente pour les cas extrêmes.
 
-**Expected Shortfall (CVaR)** : mesure la perte moyenne au-delà du seuil VaR. 
-Complète la VaR en quantifiant la sévérité des pertes dans la queue de distribution.
+**Stress tests** — permettent de simuler des chocs macroéconomiques concrets 
+(chute du PIB, hausse des taux) et d'observer leur transmission sur le 
+portefeuille via les défauts et la consommation de capital.
 
-**Stress tests** : les 4 scénarios modélisent des chocs macroéconomiques 
-distincts (canal du crédit, canal des taux, choc systémique) et leur impact 
-sur les pertes, le taux de défaut et la consommation de capital.
+**ICAAP** — compare le capital disponible aux besoins estimés sous stress. 
+C'est ce qui permet de savoir si une banque reste solvable dans un scénario adverse.
 
-**ICAAP**  compare le capital disponible (CET1) aux exigences réglementaires 
-Bâle III et aux besoins estimés sous stress. Le dashboard signale en rouge 
-quand le capital devient insuffisant sous un scénario adverse.
+*Je suis consciente que ces modèles sont des simplifications — 
+l'objectif était d'apprendre en codant.*
 
 ## Auteur
 
